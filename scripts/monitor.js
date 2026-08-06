@@ -36,7 +36,7 @@ async function monitorSolarEdge() {
 
     // Navigate to SolarEdge login page
     console.log('Navigating to SolarEdge monitoring portal...');
-    await page.goto('https://monitoring.solaredge.com/solaredge-web/p/login', {
+    await page.goto('https://www.solaredge.com/service/support/login', {
       waitUntil: 'networkidle',
       timeout: 30000
     });
