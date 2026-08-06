@@ -1,6 +1,54 @@
 const fs = require('fs');
 const path = require('path');
 
+function getChartLabels(data) {
+    return data.map(item => {
+        const date = new Date(item.timestamp);
+        return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    });
+}
+
+function getChartData(data, field) {
+    return data.map(item => item[field] || 0);
+}
+
+function getHotWaterStatus(data) {
+    const now = new Date();
+    const hours = now.getHours();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    // Check if it's hot water time (weekdays 10am-2pm)
+    const isHotWaterTime = hours >= 10 && hours < 14;
+    const isWeekday = day >= 1 && day <= 5;
+
+    if (!isHotWaterTime || !isWeekday) {
+        return 'Outside monitoring hours';
+    }
+
+    // Look for hot water circuit
+    const hotWaterCircuit = data.circuits.find(circuit =>
+        circuit.name.toLowerCase().includes('hot') ||
+        circuit.name.toLowerCase().includes('water') ||
+        circuit.name.toLowerCase().includes('heater')
+    );
+
+    if (hotWaterCircuit) {
+        if (hotWaterCircuit.power > 2.5) {
+            return 'Normal draw';
+        } else if (hotWaterCircuit.power > 1.5) {
+            return 'Low draw - check system';
+        } else {
+            return 'Very low draw - possible issue';
+        }
+    } else {
+        // Fallback to overall consumption
+        if (data.currentPower > 1.0) {
+            return 'Consumption detected';
+        } else {
+            return 'Low consumption - verify operation';
+        }
+    }
+}
 function generateDashboard() {
   console.log('Generating SolarEdge monitoring dashboard...');
 
