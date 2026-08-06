@@ -306,7 +306,7 @@ function generateDashboard() {
     <div class="container">
         <header>
             <h1>������ SolarEdge Monitoring Dashboard</h1>
-            <p class="last-updated">Last updated: ${new Date(latestData.timestamp).toLocaleString()}</p>
+            <p class="last-updated">Last updated: ${new Date(latestData.timestamp).toISOString().slice(0, 19).replace('T', ' ')} UTC</p>
         </div>
 
         <!-- Alerts Section -->
