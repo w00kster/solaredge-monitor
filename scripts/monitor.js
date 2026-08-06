@@ -43,9 +43,12 @@ async function monitorSolarEdge() {
 
     // Wait for login form and fill credentials
     console.log('Filling login credentials...');
-    await page.waitForSelector('input[name="userName"]', { timeout: 10000 });
-    await page.fill('input[name="userName"]', username);
-    await page.fill('input[name="password"]', password);
+    const usernameInput = page.locator('input[placeholder*="Username" i], input[placeholder*="Email" i], input[name*="user" i], input[id*="user" i]').first();
+    await usernameInput.waitFor({ state: 'visible', timeout: 20000 });
+    await usernameInput.fill(username);
+    const passwordInput = page.locator('input[type="password"], input[placeholder*="Password" i], input[name*="pass" i], input[id*="pass" i]').first();
+    await passwordInput.waitFor({ state: 'visible', timeout: 20000 });
+    await passwordInput.fill(password);
 
     // Click login button
     await page.click('button:has-text("Log In")');
