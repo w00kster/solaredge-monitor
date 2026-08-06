@@ -1,0 +1,571 @@
+const fs = require('fs');
+const path = require('path');
+
+function generateDashboard() {
+  console.log('Generating SolarEdge monitoring dashboard...');
+
+  const dataDir = path.join(__dirname, '..', 'data');
+  const publicDir = path.join(__dirname, '..', 'public');
+
+  // Ensure public directory exists
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+  }
+
+  // Read latest data
+  let latestData = {};
+  const latestFile = path.join(dataDir, 'latest.json');
+  if (fs.existsSync(latestFile)) {
+    try {
+      latestData = JSON.parse(fs.readFileSync(latestFile, 'utf8'));
+    } catch (e) {
+      console.warn('Could not read latest data');
+      latestData = {
+        timestamp: new Date().toISOString(),
+        currentPower: 0,
+        todayEnergy: 0,
+        circuits: []
+      };
+    }
+  } else {
+    latestData = {
+      timestamp: new Date().toISOString(),
+      currentPower: 0,
+      todayEnergy: 0,
+      circuits: []
+    };
+  }
+
+  // Read historical data for charts
+  let historicalData = [];
+  const historicalFile = path.join(dataDir, 'historical.json');
+  if (fs.existsSync(historicalFile)) {
+    try {
+      historicalData = JSON.parse(fs.readFileSync(historicalFile, 'utf8'));
+      if (!Array.isArray(historicalData)) {
+        historicalData = [];
+      }
+    } catch (e) {
+      console.warn('Could not read historical data');
+      historicalData = [];
+    }
+  }
+
+  // Generate HTML dashboard
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarEdge Monitoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .last-updated {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px 20px;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .metric:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .metric-value.high {
+            color: var(--success);
+        }
+
+        .metric-value.low {
+            color: var(--danger);
+        }
+
+        .metric-value.normal {
+            color: var(--secondary);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            border-color: var(--warning);
+            color: #92400e;
+        }
+
+        .alert-info {
+            background-color: #eff6ff;
+            border-color: var(--primary);
+            color: #1e40af;
+        }
+
+        .circuits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .circuit-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .circuit-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .circuit-power {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .circuit-power.normal {
+            color: var(--secondary);
+        }
+
+        .circuit-power.low {
+            color: var(--danger);
+        }
+
+        .circuit-power.high {
+            color: var(--success);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .circuits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>������ SolarEdge Monitoring Dashboard</h1>
+            <p class="last-updated">Last updated: ${new Date(latestData.timestamp).toLocaleString()}</p>
+        </div>
+
+        <!-- Alerts Section -->
+        <div id="alerts-section">
+            <!-- Alerts will be inserted here by JavaScript if needed -->
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">������ Current Power</div>
+                <div class="card-body">
+                    <div class="metric">
+                        <span class="metric-label">Power Now</span>
+                        <span class="metric-value ${latestData.currentPower > 2 ? 'high' : latestData.currentPower > 0.5 ? 'normal' : 'low'}">
+                            ${latestData.currentPower.toFixed(2)} kW
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">������ Today's Energy</div>
+                <div class="card-body">
+                    <div class="metric">
+                        <span class="metric-label">Energy Today</span>
+                        <span class="metric-value">
+                            ${latestData.todayEnergy.toFixed(2)} kWh
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">������ Hot Water Status</div>
+                <div class="card-body">
+                    <div class="metric">
+                        <span class="metric-label">Expected Draw</span>
+                        <span class="metric-value">~3.0 kW</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Check Time</span>
+                        <span class="metric-value">
+                            ${getHotWaterStatus(latestData)}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">������ Data Points</div>
+                <div class="card-body">
+                    <div class="metric">
+                        <span class="metric-label">Historical Records</span>
+                        <span class="metric-value">
+                            ${historicalData.length}
+                        </span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Monitoring Since</span>
+                        <span class="metric-value">
+                            ${historicalData.length > 0 ? new Date(historicalData[0].timestamp).toLocaleDateString() : 'Not started'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="card">
+            <div class="card-header">������ Power Generation Trends</div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="powerChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Circuits Section -->
+        <div class="card">
+            <div class="card-header">������ Circuit Power Distribution</div>
+            <div class="card-body">
+                <div class="circuits-grid" id="circuits-grid">
+                    <!-- Circuit cards will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>SolarEdge Monitoring System &bull; Data updated via GitHub Actions &bull;
+               <a href="https://github.com/w00kster/solaredge-monitor" target="_blank">View on GitHub</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Chart.js configuration for power trends
+        const powerCtx = document.getElementById('powerChart').getContext('2d');
+        const powerChart = new Chart(powerCtx, {
+            type: 'line',
+            data: {
+                labels: ${JSON.stringify(getChartLabels(historicalData))},
+                datasets: [
+                    {
+                        label: 'Power (kW)',
+                        data: ${JSON.stringify(getChartData(historicalData, 'currentPower'))},
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Energy (kWh)',
+                        data: ${JSON.stringify(getChartData(historicalData, 'todayEnergy'))},
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Power (kW)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Energy (kWh)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        }
+                    },
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // Update circuit display
+        const circuitsGrid = document.getElementById('circuits-grid');
+        const circuits = ${JSON.stringify(latestData.circuits)};
+
+        if (circuits.length > 0) {
+            circuits.forEach(circuit => {
+                const circuitCard = document.createElement('div');
+                circuitCard.className = 'circuit-card';
+
+                // Determine power status color
+                let powerClass = 'normal';
+                if (circuit.power < 0.5) powerClass = 'low';
+                else if (circuit.power > 5) powerClass = 'high';
+
+                circuitCard.innerHTML = \`
+                    <div class="circuit-name">\${escapeHtml(circuit.name || 'Unnamed Circuit')}</div>
+                    <div class="circuit-power \${powerClass}">\${circuit.power.toFixed(2)} kW</div>
+                \`;
+                circuitsGrid.appendChild(circuitCard);
+            });
+        } else {
+            circuitsGrid.innerHTML = '<p>No circuit-level data available. This may be due to:</p><ul><li>Limited monitoring permissions on your SolarEdge account</li><li>Older inverter model without circuit-level monitoring</li><li>Data not yet available in the current dashboard view</li></ul>';
+        }
+
+        // Helper functions
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                \"'\": '&#039;'
+            };
+
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function getChartLabels(data) {
+            return data.map(item => {
+                const date = new Date(item.timestamp);
+                return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            });
+        }
+
+        function getChartData(data, field) {
+            return data.map(item => item[field] || 0);
+        }
+
+        function getHotWaterStatus(data) {
+            const now = new Date();
+            const hours = now.getHours();
+            const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+            // Check if it's hot water time (weekdays 10am-2pm)
+            const isHotWaterTime = hours >= 10 && hours < 14;
+            const isWeekday = day >= 1 && day <= 5;
+
+            if (!isHotWaterTime || !isWeekday) {
+                return 'Outside monitoring hours';
+            }
+
+            // Look for hot water circuit
+            const hotWaterCircuit = data.circuits.find(circuit =>
+                circuit.name.toLowerCase().includes('hot') ||
+                circuit.name.toLowerCase().includes('water') ||
+                circuit.name.toLowerCase().includes('heater')
+            );
+
+            if (hotWaterCircuit) {
+                if (hotWaterCircuit.power > 2.5) {
+                    return 'Normal draw';
+                } else if (hotWaterCircuit.power > 1.5) {
+                    return 'Low draw - check system';
+                } else {
+                    return 'Very low draw - possible issue';
+                }
+            } else {
+                // Fallback to overall consumption
+                if (data.currentPower > 1.0) {
+                    return 'Consumption detected';
+                } else {
+                    return 'Low consumption - verify operation';
+                }
+            }
+        }
+
+        // Check for any recent alerts in commit messages or issues (simplified)
+        function checkForAlerts() {
+            // In a real implementation, this might check for recent GitHub issues
+            // or parse commit messages for alerts
+            return [];
+        }
+
+        // Display any alerts
+        function displayAlerts() {
+            const alertsSection = document.getElementById('alerts-section');
+            const alerts = checkForAlerts();
+
+            if (alerts.length > 0) {
+                alertsSection.innerHTML = '<h2>������ Active Alerts</h2>';
+                alerts.forEach(alert => {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-' + alert.type;
+                    alertDiv.innerHTML = \`<strong>\${alert.title}</strong>\${alert.message}\`;
+                    alertsSection.appendChild(alertDiv);
+                });
+            }
+        }
+
+        // Initialize
+        displayAlerts();
+    </script>
+</body>
+</html>
+  `;
+
+  // Write HTML file
+  fs.writeFileSync(path.join(publicDir, 'index.html'), html);
+
+  // Create a simple CSS file (though we're using inline styles for simplicity)
+  const css = `
+/* SolarEdge Monitoring Dashboard - Additional Styles */
+/* Main styles are in the HTML for simplicity in this version */
+`;
+
+  fs.writeFileSync(path.join(publicDir, 'style.css'), css);
+
+  // Create a simple JS file for additional functionality
+  const js = `
+/* SolarEdge Monitoring Dashboard - Additional JavaScript */
+// Main logic is in the HTML for simplicity in this version
+console.log('SolarEdge dashboard loaded');
+`;
+
+  fs.writeFileSync(path.join(publicDir, 'script.js'), js);
+
+  console.log('Dashboard generated successfully');
+}
+
+// Run the generator
+generateDashboard();

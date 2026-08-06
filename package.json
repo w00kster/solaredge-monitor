@@ -1,0 +1,27 @@
+{
+  "name": "solaredge-monitor",
+  "version": "1.0.0",
+  "description": "Automated SolarEdge monitoring system using Playwright",
+  "main": "scripts/monitor.js",
+  "scripts": {
+    "monitor": "node scripts/monitor.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-dashboard": "node scripts/generate-dashboard.js",
+    "playwright:install": "playwright install"
+  },
+  "keywords": [
+    "solar",
+    "solaredge",
+    "monitoring",
+    "playwright",
+    "github-actions",
+    "energy"
+  ],
+  "author": "w00kster",
+  "license": "MIT",
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "playwright": "^1.45.0"
+  },
+  "devDependencies": {}
+}

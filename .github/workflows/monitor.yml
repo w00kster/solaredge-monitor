@@ -1,0 +1,78 @@
+name: SolarEdge Monitoring
+
+# Run on a schedule optimized for solar detection
+on:
+  schedule:
+    # Every 20 minutes during daylight hours (6am-8pm)
+    - '0,20,40 6-19 * * *'  # 6am-7:40pm, every 20 minutes
+    # Once per hour during nighttime (8pm-6am)
+    - '0 20-5 * * *'        # 8pm-5am, at the top of the hour
+  workflow_dispatch:        # Allow manual triggering
+    inputs:
+      log-level:
+        description: 'Log level'
+        required: false
+        default: 'info'
+        options: ['debug', 'info', 'warning']
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Get all history for better diff tracking
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+
+    - name: Run SolarEdge monitor
+      env:
+        SOLAREDGE_USERNAME: ${{ secrets.SOLAREDGE_USERNAME }}
+        SOLAREDGE_PASSWORD: ${{ secrets.SOLAREDGE_PASSWORD }}
+      run: npm run monitor
+
+    - name: Commit data changes
+      if: success() && github.event_name != 'workflow_dispatch' || inputs.force-commit == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Check if there are any changes to commit
+        if git diff --quiet; then
+          echo "No data changes to commit"
+        else
+          git add data/
+          git commit -m "���📊 SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "Commit failed"
+          git push origin HEAD:${{ github.ref }}
+        fi
+
+    - name: Generate and deploy dashboard
+      if: success()  # Always try to update dashboard
+      run: |
+        npm run generate-dashboard
+
+        # Configure git for Pages deployment
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Add and commit dashboard updates
+        git add public/
+        if ! git diff --cached --quiet; then
+          git commit -m "���📈 Dashboard update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          git push origin HEAD:${{ github.ref }}
+        else
+          echo "No dashboard changes to commit"
+        fi
