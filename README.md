@@ -3,14 +3,14 @@
 Automated system to monitor SolarEdge photovoltaic installations using Playwright for login and data extraction. Designed to detect anomalies in power consumption patterns, particularly for hot water circuit operation (~3kW draw between 10am-2pm), to provide early warning of electrical issues before they require emergency service calls.
 
 ## Features
-- �� 🔐 **Secure Login**: Uses GitHub repository secrets to securely authenticate with SolarEdge monitoring portal
-- �� 🤖 **Automated Extraction**: Playwright browser automation for reliable data collection
-- �� ⏰ **Scheduled Collection**: GitHub Actions runs monitoring every 20 minutes during daylight hours
-- �� 📊 **Data Tracking**: Historical data stored in repository for trend analysis
-- �� 🚨 **Smart Alerting**: Detects missing hot water circuit draw (~3kW, 10am-2pm) and creates GitHub Issues
-- �� 🌐 **Live Dashboard**: Visualization hosted on GitHub Pages for easy access
-- �� 📈 **Real-time Graphs**: Interactive charts showing production/consumption trends
-- �� ⚠��️ **Early Warning**: Catch electrical issues before they require emergency service calls
+- 🔐 **Secure Login**: Uses GitHub repository secrets to securely authenticate with SolarEdge monitoring portal
+- 🤖 **Automated Extraction**: Playwright browser automation for reliable data collection
+- ⏰ **Scheduled Collection**: GitHub Actions runs monitoring every 20 minutes during daylight hours
+- 📊 **Data Tracking**: Historical data stored in repository for trend analysis
+- 🚨 **Smart Alerting**: Detects missing hot water circuit draw (~3kW, 10am-2pm) and creates GitHub Issues
+- 🌐 **Live Dashboard**: Visualization hosted on GitHub Pages for easy access
+- 📈 **Real-time Graphs**: Interactive charts showing production/consumption trends
+- ⚠ **Early Warning**: Catch electrical issues before they require emergency service calls
 
 ## How It Works
 
@@ -66,7 +66,7 @@ solaredge-monitor/
 │   ├── script.js                # Frontend dashboard logic
 │   └── chart.js                 # Charting library (Chart.js)
 ├── README.md                    # This file
-�└── package.json                 # Node.js dependencies and scripts
+└── package.json                 # Node.js dependencies and scripts
 ```
 
 ## Data Collection Schedule
@@ -124,7 +124,4 @@ npx playwright install
 - Add weather data correlation for more accurate solar production expectations
 - Implement predictive maintenance alerts based on trends
 - Add multi-system support for monitoring multiple SolarEdge installations
-
-## License
-
-MIT License - feel free to adapt and extend for your own monitoring needs.
+- 
