@@ -4,9 +4,9 @@ name: SolarEdge Monitoring
 on:
   schedule:
     # Every 20 minutes during daylight hours (6am-8pm)
-    - '0,20,40 6-19 * * *'  # 6am-7:40pm, every 20 minutes
+    - '0,20,40 6-19 * * *'
     # Once per hour during nighttime (8pm-6am)
-    - '0 0-5,20-23 * * *'   # 8pm-5am, at the top of the hour
+    - '0 0-5,20-23 * * *'
   workflow_dispatch:        # Allow manual triggering
     inputs:
       log-level:
