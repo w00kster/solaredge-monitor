@@ -36,9 +36,9 @@ async function monitorSolarEdge() {
 
     // Navigate to SolarEdge login page
     console.log('Navigating to SolarEdge monitoring portal...');
-    await page.goto('https://monitoring.solaredge.com/solaredge-web/p/login', {
+    await page.goto('https://monitoring.solaredge.com/mfe/auth/', {
       waitUntil: 'networkidle',
-      timeout: 30000
+      timeout: 60000
     });
 
     // Wait for login form and fill credentials
@@ -52,9 +52,9 @@ async function monitorSolarEdge() {
 
     // Wait for login to complete and dashboard to load
     console.log('Waiting for login to complete...');
-    await page.waitForURL('**/solaredge-web/p/dashboard**', {
+    await page.waitForURL('**/one#/site-list**', {
       waitUntil: 'networkidle',
-      timeout: 30000
+      timeout: 60000
     });
 
     // Extract data from the dashboard
