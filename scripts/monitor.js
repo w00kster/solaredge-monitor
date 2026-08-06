@@ -56,7 +56,7 @@ async function monitorSolarEdge() {
     await inputs.nth(1).fill(password);
 
     // Click login button
-    await page.click('button:has-text("Log In")');
+    await page.click('button:has-text(/Log In|Sign in/i)');
 
     // Wait for login to complete and dashboard to load
     console.log('Waiting for login to complete...');
