@@ -41,8 +41,8 @@ async function monitorSolarEdge() {
       timeout: 60000
     });
 
-    // Wait for login form to load (wait for URL to indicate login page)
-    await page.waitForURL('**/login**', { waitUntil: 'networkidle', timeout: 30000 });
+    // Wait for login form to appear (wait for text indicating form is loaded)
+    await page.waitForLocator('text=/Sign in|Log in/i', { timeout: 20000 });
     // Wait for login form and fill credentials
     console.log('Filling login credentials...');
     // Wait for password field to appear
