@@ -15,7 +15,7 @@ Automated system to monitor SolarEdge photovoltaic installations using Playwrigh
 
 ## How It Works
 
-1. **Authentication**: Uses encrypted secrets to securely login to SolarEdge monitoring portal
+1. **Authentication**: Uses GitHub repository secrets (SOLAREDGE_USERNAME and SOLAREDGE_PASSWORD) to securely login to SolarEdge monitoring portal
 2. **Data Extraction**: Playwright navigates the SolarEdge website to extract:
    - Real-time power production and consumption
    - Historical energy data
@@ -53,8 +53,7 @@ Automated system to monitor SolarEdge photovoltaic installations using Playwrigh
 solaredge-monitor/
 ├── .github/
 │   └── workflows/
-│       ├── monitor.yml          # GitHub Actions workflow for data collection
-│       └── pages.yml            # GitHub Actions workflow for deploying to Pages
+│       └── monitor.yml          # GitHub Actions workflow for data collection & dashboard deployment
 ├── scripts/
 │   ├── monitor.js               # Main Playwright monitoring script
 │   ├── extract-data.js          # Data extraction helpers

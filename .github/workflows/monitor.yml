@@ -6,7 +6,7 @@ on:
     # Every 20 minutes during daylight hours (6am-8pm)
     - '0,20,40 6-19 * * *'  # 6am-7:40pm, every 20 minutes
     # Once per hour during nighttime (8pm-6am)
-    - '0 20-5 * * *'        # 8pm-5am, at the top of the hour
+    - '0 0-5,20-23 * * *'   # 8pm-5am, at the top of the hour
   workflow_dispatch:        # Allow manual triggering
     inputs:
       log-level:
@@ -29,7 +29,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
 
     - name: Install dependencies
