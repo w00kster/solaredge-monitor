@@ -4,14 +4,14 @@ Automated system to monitor SolarEdge photovoltaic installations using Playwrigh
 
 ## Features
 
-- �� 🔐 Secure login to SolarEdge monitoring portal using credentials stored in GitHub Secrets
-- �� 🤖 Automated data extraction using Playwright browser automation
-- �� ⏰ Scheduled data collection via GitHub Actions (every 15-30 minutes during daylight hours)
-- �� 📊 Data storage and historical tracking in repository
-- �� 🚨 Alerting for missing expected power draw patterns (hot water circuit)
-- �� 🌐 Visualization dashboard hosted on GitHub Pages
-- �� 📈 Real-time and historical graphs of solar production/consumption
-- �� ⚠��️ Early detection of electrical issues to avoid weekend call-out fees
+- ���� �� �� 🔐 **Secure Login**: Uses GitHub repository secrets to securely authenticate with SolarEdge monitoring portal
+- ���� �� �� 🤖 **Automated Extraction**: Playwright browser automation for reliable data collection
+- ���� �� �� ⏰ **Scheduled Collection**: GitHub Actions runs monitoring every 20 minutes during daylight hours
+- ���� �� �� 📊 **Data Tracking**: Historical data stored in repository for trend analysis
+- ���� �� �� 🚨 **Smart Alerting**: Detects missing hot water circuit draw (~3kW, 10am-2pm) and creates GitHub Issues
+- ���� �� �� 🌐 **Live Dashboard**: Visualization hosted on GitHub Pages for easy access
+- ���� �� �� 📈 **Real-time Graphs**: Interactive charts showing production/consumption trends
+- ���� �� �� ⚠��������������️ **Early Warning**: Catch electrical issues before they require emergency service calls
 
 ## How It Works
 
@@ -68,7 +68,7 @@ solaredge-monitor/
 │   ├── script.js                # Frontend dashboard logic
 │   └── chart.js                 # Charting library (Chart.js)
 ├── README.md                    # This file
-�└── package.json                 # Node.js dependencies and scripts
+���└── package.json                 # Node.js dependencies and scripts
 ```
 
 ## Data Collection Schedule

@@ -1,6 +1,7 @@
 name: SolarEdge Monitoring
 
 # Run on a schedule optimized for solar detection
+# Fixed cron syntax: every 20min 6am-7:40pm, hourly 8pm-5am
 on:
   schedule:
     # Every 20 minutes during daylight hours (6am-8pm)
@@ -55,7 +56,7 @@ jobs:
           echo "No data changes to commit"
         else
           git add data/
-          git commit -m "���📊 SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "Commit failed"
+          git commit -m "SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "Commit failed"
           git push origin HEAD:${{ github.ref }}
         fi
 
@@ -71,7 +72,7 @@ jobs:
         # Add and commit dashboard updates
         git add public/
         if ! git diff --cached --quiet; then
-          git commit -m "���📈 Dashboard update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          git commit -m "Dashboard update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
           git push origin HEAD:${{ github.ref }}
         else
           echo "No dashboard changes to commit"
