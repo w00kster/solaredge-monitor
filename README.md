@@ -3,15 +3,14 @@
 Automated system to monitor SolarEdge photovoltaic installations using Playwright for login and data extraction. Designed to detect anomalies in power consumption patterns, particularly for hot water circuit operation (~3kW draw between 10am-2pm), to provide early warning of electrical issues before they require emergency service calls.
 
 ## Features
-
-- ���� �� �� 🔐 **Secure Login**: Uses GitHub repository secrets to securely authenticate with SolarEdge monitoring portal
-- ���� �� �� 🤖 **Automated Extraction**: Playwright browser automation for reliable data collection
-- ���� �� �� ⏰ **Scheduled Collection**: GitHub Actions runs monitoring every 20 minutes during daylight hours
-- ���� �� �� 📊 **Data Tracking**: Historical data stored in repository for trend analysis
-- ���� �� �� 🚨 **Smart Alerting**: Detects missing hot water circuit draw (~3kW, 10am-2pm) and creates GitHub Issues
-- ���� �� �� 🌐 **Live Dashboard**: Visualization hosted on GitHub Pages for easy access
-- ���� �� �� 📈 **Real-time Graphs**: Interactive charts showing production/consumption trends
-- ���� �� �� ⚠��������������️ **Early Warning**: Catch electrical issues before they require emergency service calls
+- �� 🔐 **Secure Login**: Uses GitHub repository secrets to securely authenticate with SolarEdge monitoring portal
+- �� 🤖 **Automated Extraction**: Playwright browser automation for reliable data collection
+- �� ⏰ **Scheduled Collection**: GitHub Actions runs monitoring every 20 minutes during daylight hours
+- �� 📊 **Data Tracking**: Historical data stored in repository for trend analysis
+- �� 🚨 **Smart Alerting**: Detects missing hot water circuit draw (~3kW, 10am-2pm) and creates GitHub Issues
+- �� 🌐 **Live Dashboard**: Visualization hosted on GitHub Pages for easy access
+- �� 📈 **Real-time Graphs**: Interactive charts showing production/consumption trends
+- �� ⚠��️ **Early Warning**: Catch electrical issues before they require emergency service calls
 
 ## How It Works
 
@@ -38,17 +37,16 @@ Automated system to monitor SolarEdge photovoltaic installations using Playwrigh
 
 ### Configuration
 
-1. **Fork or clone this repository**
-2. **Add secrets to your repository**:
+1. Fork or clone this repository
+2. Add secrets to your repository:
    - Go to Settings > Secrets and variables > Actions
    - Add:
-     - `SOLAREDGE_USERNAME`: Your SolarEdge monitoring portal username
-     - `SOLAREDGE_PASSWORD`: Your SolarEdge monitoring portal password
-3. **Enable GitHub Actions** (if not already enabled)
-4. **Enable GitHub Pages** in repository settings to serve the `public/` directory
+     - SOLAREDGE_USERNAME: Your SolarEdge monitoring portal username
+     - SOLAREDGE_PASSWORD: Your SolarEdge monitoring portal password
+3. Enable GitHub Actions (if not already enabled)
+4. Enable GitHub Pages in repository settings to serve the public/ directory
 
 ## Project Structure
-
 ```
 solaredge-monitor/
 ├── .github/
@@ -68,7 +66,7 @@ solaredge-monitor/
 │   ├── script.js                # Frontend dashboard logic
 │   └── chart.js                 # Charting library (Chart.js)
 ├── README.md                    # This file
-���└── package.json                 # Node.js dependencies and scripts
+�└── package.json                 # Node.js dependencies and scripts
 ```
 
 ## Data Collection Schedule
@@ -94,7 +92,7 @@ Primary alert condition:
 
 ### Local Testing
 
-```bash
+```
 # Install dependencies
 npm install
 
@@ -108,7 +106,7 @@ node scripts/generate-dashboard.js
 ### Playwright Setup
 
 First-time setup requires installing browsers:
-```bash
+```
 npx playwright install
 ```
 
