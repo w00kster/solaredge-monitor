@@ -16,6 +16,11 @@ on:
         required: false
         default: 'info'
         options: ['debug', 'info', 'warning']
+      force-commit:
+        description: 'Force commit data changes'
+        required: false
+        default: 'false'
+        options: ['true', 'false']
 
 jobs:
   monitor:
