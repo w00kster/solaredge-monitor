@@ -305,7 +305,7 @@ function generateDashboard() {
 <body>
     <div class="container">
         <header>
-            <h1>��������������⚡ SolarEdge Monitoring Dashboard</h1>
+            <h1>⚡ SolarEdge Monitoring Dashboard</h1>
             <p class="last-updated">Last updated: ${new Date(latestData.timestamp).toISOString().slice(0, 19).replace('T', ' ')} UTC</p>
         </div>
 
@@ -317,7 +317,7 @@ function generateDashboard() {
         <!-- Key Metrics -->
         <div class="grid">
             <div class="card">
-                <div class="card-header">������ Current Power</div>
+                <div class="card-header"> Current Power</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Power Now</span>
@@ -329,7 +329,7 @@ function generateDashboard() {
             </div>
 
             <div class="card">
-                <div class="card-header">������ Today's Energy</div>
+                <div class="card-header"> Today's Energy</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Energy Today</span>
@@ -341,7 +341,7 @@ function generateDashboard() {
             </div>
 
             <div class="card">
-                <div class="card-header">������ Hot Water Status</div>
+                <div class="card-header"> Hot Water Status</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Expected Draw</span>
@@ -357,7 +357,7 @@ function generateDashboard() {
             </div>
 
             <div class="card">
-                <div class="card-header">������ Data Points</div>
+                <div class="card-header"> Data Points</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Historical Records</span>
@@ -377,7 +377,7 @@ function generateDashboard() {
 
         <!-- Charts Section -->
         <div class="card">
-            <div class="card-header">������ Power Generation Trends</div>
+            <div class="card-header"> Power Generation Trends</div>
             <div class="card-body">
                 <div class="chart-container">
                     <canvas id="powerChart"></canvas>
@@ -387,7 +387,7 @@ function generateDashboard() {
 
         <!-- Circuits Section -->
         <div class="card">
-            <div class="card-header">������ Circuit Power Distribution</div>
+            <div class="card-header"> Circuit Power Distribution</div>
             <div class="card-body">
                 <div class="circuits-grid" id="circuits-grid">
                     <!-- Circuit cards will be inserted here by JavaScript -->
@@ -575,7 +575,7 @@ function generateDashboard() {
             const alerts = checkForAlerts();
 
             if (alerts.length > 0) {
-                alertsSection.innerHTML = '<h2>������ Active Alerts</h2>';
+                alertsSection.innerHTML = '<h2> Active Alerts</h2>';
                 alerts.forEach(alert => {
                     const alertDiv = document.createElement('div');
                     alertDiv.className = 'alert alert-' + alert.type;
