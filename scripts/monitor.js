@@ -378,7 +378,7 @@ async function createAnomalyIssue(type, details) {
 
     switch (type) {
       case 'low-hot-water-draw':
-        title = `���🚨 Low Hot Water Circuit Draw Detected`;
+        title = `🚨 Low Hot Water Circuit Draw Detected`;
         body = `## SolarEdge Monitoring Alert
 
 **Time**: ${new Date(details.timestamp).toLocaleString()}
@@ -397,7 +397,7 @@ Please investigate to avoid potential emergency service calls.
         break;
 
       case 'low-consumption-during-hot-water-hours':
-        title = `���🚨 Low Power Consumption During Hot Water Hours`;
+        title = `🚨 Low Power Consumption During Hot Water Hours`;
         body = `## SolarEdge Monitoring Alert
 
 **Time**: ${new Date(details.timestamp).toLocaleString()}
@@ -410,7 +410,7 @@ Please check the hot water system and electrical circuit.
         break;
 
       default:
-        title = `���🚨 SolarEdge Monitoring Anomaly`;
+        title = `🚨 SolarEdge Monitoring Anomaly`;
         body = `## SolarEdge Monitoring Alert
 
 **Time**: ${new Date(details.timestamp).toLocaleString()}
@@ -434,7 +434,7 @@ async function createMonitoringIssue(error) {
   try {
     const { execSync } = require('child_process');
 
-    const title = `���💥 SolarEdge Monitoring System Error`;
+    const title = `💥 SolarEdge Monitoring System Error`;
     const body = `## SolarEdge Monitoring System Failure
 
 **Time**: ${new Date().toLocaleString()}
