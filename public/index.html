@@ -203,7 +203,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>��������������⚡ SolarEdge Monitoring Dashboard</h1>
+            <h1>⚡ SolarEdge Monitoring Dashboard</h1>
             <p class="last-updated">Last updated: 2026-08-09 23:53:22 UTC</p>
         </div>
 
@@ -215,7 +215,7 @@
         <!-- Key Metrics -->
         <div class="grid">
             <div class="card">
-                <div class="card-header">������ Current Power</div>
+                <div class="card-header"> Current Power</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Power Now</span>
@@ -227,7 +227,7 @@
             </div>
 
             <div class="card">
-                <div class="card-header">������ Today's Energy</div>
+                <div class="card-header"> Today's Energy</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Energy Today</span>
@@ -239,7 +239,7 @@
             </div>
 
             <div class="card">
-                <div class="card-header">������ Hot Water Status</div>
+                <div class="card-header"> Hot Water Status</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Expected Draw</span>
@@ -255,7 +255,7 @@
             </div>
 
             <div class="card">
-                <div class="card-header">������ Data Points</div>
+                <div class="card-header"> Data Points</div>
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Historical Records</span>
@@ -275,7 +275,7 @@
 
         <!-- Charts Section -->
         <div class="card">
-            <div class="card-header">������ Power Generation Trends</div>
+            <div class="card-header"> Power Generation Trends</div>
             <div class="card-body">
                 <div class="chart-container">
                     <canvas id="powerChart"></canvas>
@@ -285,7 +285,7 @@
 
         <!-- Circuits Section -->
         <div class="card">
-            <div class="card-header">������ Circuit Power Distribution</div>
+            <div class="card-header"> Circuit Power Distribution</div>
             <div class="card-body">
                 <div class="circuits-grid" id="circuits-grid">
                     <!-- Circuit cards will be inserted here by JavaScript -->
@@ -473,7 +473,7 @@
             const alerts = checkForAlerts();
 
             if (alerts.length > 0) {
-                alertsSection.innerHTML = '<h2>������ Active Alerts</h2>';
+                alertsSection.innerHTML = '<h2> Active Alerts</h2>';
                 alerts.forEach(alert => {
                     const alertDiv = document.createElement('div');
                     alertDiv.className = 'alert alert-' + alert.type;
