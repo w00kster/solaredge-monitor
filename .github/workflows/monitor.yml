@@ -58,13 +58,47 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
+        echo "=== DEBUG: Checking data directory ==="
+        ls -la data/
+        echo "=== END DEBUG ==="
+
         # Check if there are any changes to commit
+        echo "Checking for changes with git diff --quiet..."
         if git diff --quiet; then
-          echo "No data changes to commit"
+          echo "No data changes to commit according to git diff --quiet"
+          echo "Running git diff --stat to see what changed:"
+          git diff --stat || echo "git diff --stat failed or showed no changes"
+          echo "Checking if data files exist and their content:"
+          if [ -f "data/latest.json" ]; then
+            echo "latest.json exists, first 100 chars:"
+            head -c 100 data/latest.json | cat -A
+            echo ""
+          else
+            echo "latest.json does NOT exist"
+          fi
+          if [ -f "data/historical.json" ]; then
+            echo "historical.json exists, first 100 chars:"
+            head -c 100 data/historical.json | cat -A
+            echo ""
+          else
+            echo "historical.json does NOT exist"
+          fi
         else
+          echo "Data changes detected, proceeding with commit..."
           git add data/
-          git commit -m "SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "Commit failed"
-          git push origin HEAD:${{ github.ref }}
+          echo "Files staged for commit:"
+          git status --porcelain
+          echo "Attempting commit..."
+          git commit -m "SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || {
+            echo "ERROR: Commit failed";
+            exit 1;
+          }
+          echo "Commit successful, attempting push..."
+          git push origin HEAD:${{ github.ref }} || {
+            echo "ERROR: Push failed";
+            exit 1;
+          }
+          echo "Push successful"
         fi
 
     - name: Generate and deploy dashboard
