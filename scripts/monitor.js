@@ -60,10 +60,22 @@ async function monitorSolarEdge() {
 
     // Wait for login to complete and dashboard to load
     console.log('Waiting for login to complete...');
-    await page.waitForURL('**/one#/site-list**', {
-      waitUntil: 'networkidle',
-      timeout: 60000
-    });
+    try {
+      await page.waitForURL('**/one#/site-list**', {
+        waitUntil: 'networkidle',
+        timeout: 30000
+      });
+    } catch (e) {
+      console.log('Primary URL pattern not found, trying alternative...');
+      // Wait for any URL under monitoring.solaredge.com with /one#/
+      await page.waitForURL('**/monitoring.solaredge.com/one#/**', {
+        waitUntil: 'networkidle',
+        timeout: 30000
+      });
+    }
+    // Log current URL for debugging
+    const currentUrl = await page.url();
+    console.log(`Current URL after login wait: ${currentUrl}`);
 
     // Extract data from the dashboard
     console.log('Extracting solar data...');
