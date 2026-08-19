@@ -30,7 +30,10 @@ git push -u origin feature/description
 # After approval and checks pass
 git checkout main
 git pull origin main
-git delete-branch feature/description  # or delete via GitHub
+# Delete branch locally and remotely
+git branch -d feature/description
+git push origin --delete feature/description
+# or delete via GitHub interface
 ```
 
 ## Agent Usage
@@ -39,8 +42,10 @@ When using agents for concurrent work:
 - Each agent should work on its own branch
 - Agents should not make direct changes to `main` without PR review
 - Coordinate agent work to avoid conflicts
+- Always create PRs for agent-made changes to ensure proper review
 
 Current agents in use:
-- (List agents as they are created)
+- **Claude Code Agent**: Used for automated monitoring workflow improvements and maintenance
+- **Monitoring Agent**: The SolarEdge monitoring system itself (runs via GitHub Actions)
 
-Last updated: $(date)
+Last updated: August 19, 2026
