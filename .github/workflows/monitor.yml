@@ -62,7 +62,7 @@ jobs:
       run: npm run monitor
 
     - name: Commit data changes
-      if: success() && github.event_name != 'workflow_dispatch' || inputs.force-commit == 'true'
+      if: success()
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -71,19 +71,14 @@ jobs:
         ls -la data/
         echo "=== END DEBUG ==="
 
-        # Check if there are any changes to commit
-        echo "Checking for changes with git diff --quiet..."
-        # Check if there are any changes to commit (including untracked)
-        echo "Checking for changes in data directory..."
-        if [ -z "$(git status --porcelain data)" ]; then
-          echo "No data changes to commit according to git status"
-        else
-          echo "Data changes detected, proceeding with commit..."
+        # If force-commit is true, skip change detection and commit anyway
+        if [[ "${{ inputs.force-commit }}" == "true" ]]; then
+          echo "Force commit enabled, committing data changes..."
           git add data/
-          echo "Files staged for commit:"
+          echo "Files staged for commit (force):"
           git status --porcelain
-          echo "Attempting commit..."
-          git commit -m "SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || {
+          echo "Attempting commit (force)..."
+          git commit -m "SolarEdge data update (force): $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || {
             echo "ERROR: Commit failed";
             exit 1;
           }
@@ -93,6 +88,30 @@ jobs:
             exit 1;
           }
           echo "Push successful"
+        else
+          # Check if there are any changes to commit
+          echo "Checking for changes with git diff --quiet..."
+          # Check if there are any changes to commit (including untracked)
+          echo "Checking for changes in data directory..."
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "No data changes to commit according to git status"
+          else
+            echo "Data changes detected, proceeding with commit..."
+            git add data/
+            echo "Files staged for commit:"
+            git status --porcelain
+            echo "Attempting commit..."
+            git commit -m "SolarEdge data update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || {
+              echo "ERROR: Commit failed";
+              exit 1;
+            }
+            echo "Commit successful, attempting push..."
+            git push origin HEAD:${{ github.ref }} || {
+              echo "ERROR: Push failed";
+              exit 1;
+            }
+            echo "Push successful"
+          fi
         fi
 
     - name: Generate and deploy dashboard
