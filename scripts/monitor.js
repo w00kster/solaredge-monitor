@@ -15,24 +15,19 @@ async function monitorSolarEdge() {
     process.exit(1);
   }
 
-  const browser = await chromium.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu'
-    ]
+  // Create a new context with tracing enabled
+  const context = await browser.newContext();
+  // Start tracing
+  await context.tracing.start({
+    screenshots: true,
+    snapshots: true,
+    sources: true,
   });
 
-  try {
-    const page = await browser.newPage();
+  const page = await context.newPage();
 
-    // Set viewport for consistent rendering
-    await page.setViewportSize({ width: 1280, height: 720 });
+  // Set viewport for consistent rendering
+  await page.setViewportSize({ width: 1280, height: 720 });
 
     // Navigate to SolarEdge login page
     console.log('Navigating to SolarEdge monitoring portal...');
@@ -86,7 +81,20 @@ async function monitorSolarEdge() {
 
     // Check for anomalies and create alerts if needed
     await checkForAnomalies(data);
-
+    // Stop tracing and save trace
+    try {
+      await context.tracing.stop({ path: 'trace.zip' });
+      console.log('Trace saved to trace.zip');
+    } catch (traceError) {
+      console.warn('Failed to stop tracing:', traceError.message);
+    }
+    // Optional: take a screenshot for debugging
+    try {
+      await page.screenshot({ path: 'screenshot.png', fullPage: true });
+      console.log('Screenshot saved to screenshot.png');
+    } catch (ssError) {
+      console.warn('Failed to take screenshot:', ssError.message);
+    }
     console.log('Monitoring completed successfully');
 
   } catch (error) {
