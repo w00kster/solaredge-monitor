@@ -70,6 +70,7 @@ async function monitorSolarEdge() {
     // Log current URL for debugging
     const currentUrl = await page.url();
     console.log(`Current URL after login wait: ${currentUrl}`);
+await dismissTermsModal(page);
 
     // Extract data from the dashboard
     console.log('Extracting solar data...');
@@ -482,3 +483,18 @@ Please check:
 
 // Run the monitoring function
 monitorSolarEdge().catch(console.error);
+
+async function dismissTermsModal(page) {
+  try {
+    // Wait for either button to be visible (within a modal) for up to 5 seconds
+    const buttons = page.locator('button:has-text("Submit"), button:has-text("Remind Me Later")');
+    // Wait for first button to be visible
+    await buttons.first().waitFor({ state: 'visible', timeout: 5000 });
+    // Click the first visible button
+    await buttons.first().click();
+    console.log('Dismissed Terms and Conditions modal via button click');
+  } catch (err) {
+    // Not found, continue
+    console.debug('No Terms and Conditions modal buttons found:', err.message);
+  }
+}
