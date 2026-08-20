@@ -116,9 +116,79 @@ async function extractSolarData(page) {
   // Wait for data to load on dashboard
   await page.waitForTimeout(5000); // Allow time for charts/widgets to load
 
-  // Extract current power data
-  const currentPower = await extractCurrentPower(page);
-  const todayEnergy = await extractTodayEnergy(page);
+  // Try to extract from page text content
+  const textData = await page.evaluate(() => {
+    const bodyText = document.body.innerText;
+    const powerMatch = bodyText.match(/([\d,]+\.?\d*)\s*kW/i);
+    const energyMatch = bodyText.match(/([\d,]+\.?\d*)\s*kWh/i);
+    const power = powerMatch ? parseFloat(powerMatch[1].replace(/,/g, '')) : null;
+    const energy = energyMatch ? parseFloat(energyMatch[1].replace(/,/g, '')) : null;
+    return { power, energy };
+  });
+
+  let currentPower = textData.power;
+  let todayEnergy = textData.energy;
+
+  // Fallback to selector-based extraction if text extraction failed
+  if (currentPower === null) {
+    // Try to find current power display - this will vary based on SolarEdge UI
+    // Common selectors for power displays
+    const selectors = [
+      '.power-value',
+      '[data-testid="current-power"]',
+      '.current-power',
+      '.site-power-value',
+      'text=/[\d,]+\.?\d*\s*kW/i'
+    ];
+
+    for (const selector of selectors) {
+      try {
+        const element = await page.locator(selector).first();
+        if (await element.count() > 0) {
+          const text = await element.textContent();
+          // Extract numeric value from text
+          const match = text.match(/([\d,]+\.?\d*)/);
+          if (match) {
+            currentPower = parseFloat(match[1].replace(/,/g, ''));
+            break;
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+
+    // If we can't find it via selectors, try to extract from charts
+    if (currentPower === null) {
+      currentPower = await extractPowerFromChart(page);
+    }
+  }
+
+  if (todayEnergy === null) {
+    const energySelectors = [
+      '.energy-value',
+      '[data-testid="today-energy"]',
+      '.today-energy',
+      '.daily-energy-value',
+      'text=/[\d,]+\.?\d*\s*kWh/i'
+    ];
+
+    for (const selector of energySelectors) {
+      try {
+        const element = await page.locator(selector).first();
+        if (await element.count() > 0) {
+          const text = await element.textContent();
+          const match = text.match(/([\d,]+\.?\d*)/);
+          if (match) {
+            todayEnergy = parseFloat(match[1].replace(/,/g, ''));
+            break;
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+  }
 
   // Try to extract circuit-level data if available
   const circuitData = await extractCircuitData(page);
@@ -135,7 +205,6 @@ async function extractSolarData(page) {
     }
   };
 }
-
 async function extractCurrentPower(page) {
   try {
     // Try to find current power display - this will vary based on SolarEdge UI
