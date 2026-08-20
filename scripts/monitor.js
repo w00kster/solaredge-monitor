@@ -490,11 +490,13 @@ async function dismissTermsModal(page) {
     const buttons = page.locator('button:has-text("Submit"), button:has-text("Remind Me Later")');
     // Wait for first button to be visible
     await buttons.first().waitFor({ state: 'visible', timeout: 5000 });
-    // Click the first visible button
-    await buttons.first().click();
+    // Click the first visible button with force and timeout
+    await buttons.first().click({ timeout: 5000, force: true });
     console.log('Dismissed Terms and Conditions modal via button click');
+    // Wait for the button to be detached or not visible (optional)
+    await buttons.first().waitFor({ state: 'detached', timeout: 5000 });
   } catch (err) {
-    // Not found, continue
-    console.debug('No Terms and Conditions modal buttons found:', err.message);
+    // Not found or timeout, continue
+    console.debug('No Terms and Conditions modal buttons found or timeout:', err.message);
   }
 }
