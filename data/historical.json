@@ -12,5 +12,173 @@
     "todayEnergy": 0,
     "circuits": [],
     "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T00:55:49.291Z",
+    "currentPower": 0,
+    "todayEnergy": 0,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T04:58:10.818Z",
+    "currentPower": 0,
+    "todayEnergy": 0,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T05:42:51.492Z",
+    "currentPower": 0,
+    "todayEnergy": 0,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T06:28:13.308Z",
+    "currentPower": 0,
+    "todayEnergy": 0,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T06:42:49.959Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T07:13:49.127Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T08:02:52.562Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T09:02:10.714Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T09:56:00.991Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T10:21:56.558Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T11:20:11.173Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T12:29:34.290Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T13:40:59.696Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T14:27:59.090Z",
+    "currentPower": 6.38,
+    "todayEnergy": 23.54,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T15:26:32.622Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T16:24:36.500Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T17:22:13.599Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T18:26:00.250Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T19:25:27.994Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T20:37:13.607Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T21:04:47.695Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T21:50:23.089Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T22:35:21.503Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-08-20T23:03:23.963Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.35,
+    "circuits": [],
+    "rawData": {}
   }
 ]
