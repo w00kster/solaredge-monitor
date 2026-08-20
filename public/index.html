@@ -204,7 +204,7 @@
     <div class="container">
         <header>
             <h1>⚡ SolarEdge Monitoring Dashboard</h1>
-            <p class="last-updated">Last updated: 2026-08-20 06:05:56 UTC</p>
+            <p class="last-updated">Last updated: 2026-08-20 06:42:49 UTC</p>
         </div>
 
         <!-- Alerts Section -->
@@ -219,8 +219,8 @@
                 <div class="card-body">
                     <div class="metric">
                         <span class="metric-label">Power Now</span>
-                        <span class="metric-value low">
-                            0.00 kW
+                        <span class="metric-value high">
+                            6.38 kW
                         </span>
                     </div>
                 </div>
@@ -232,7 +232,7 @@
                     <div class="metric">
                         <span class="metric-label">Energy Today</span>
                         <span class="metric-value">
-                            0.00 kWh
+                            23.54 kWh
                         </span>
                     </div>
                 </div>
@@ -260,7 +260,7 @@
                     <div class="metric">
                         <span class="metric-label">Historical Records</span>
                         <span class="metric-value">
-                            9
+                            7
                         </span>
                     </div>
                     <div class="metric">
@@ -305,11 +305,11 @@
         const powerChart = new Chart(powerCtx, {
             type: 'line',
             data: {
-                labels: ["11:11 PM","11:32 PM","11:58 PM","12:27 AM","03:03 AM","04:05 AM","04:59 AM","05:40 AM","06:05 AM"],
+                labels: ["11:11 PM","11:32 PM","12:55 AM","04:58 AM","05:42 AM","06:28 AM","06:42 AM"],
                 datasets: [
                     {
                         label: 'Power (kW)',
-                        data: [0,0,0,0,0,0,0,0,0],
+                        data: [0,0,0,0,0,0,6.38],
                         borderColor: 'rgb(59, 130, 246)',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         tension: 0.3,
@@ -317,7 +317,7 @@
                     },
                     {
                         label: 'Energy (kWh)',
-                        data: [0,0,0,0,0,0,0,0,0],
+                        data: [0,0,0,0,0,0,23.54],
                         borderColor: 'rgb(16, 185, 129)',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         tension: 0.3,

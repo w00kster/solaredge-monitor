@@ -28,6 +28,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      issues: write
 
     steps:
     - name: Checkout repository
@@ -60,6 +61,16 @@ jobs:
         SOLAREDGE_USERNAME: ${{ secrets.SOLAREDGE_USERNAME }}
         SOLAREDGE_PASSWORD: ${{ secrets.SOLAREDGE_PASSWORD }}
       run: npm run monitor
+
+    - name: Upload trace and screenshot
+      if: always()  # Upload even if monitoring fails
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-debug
+        path: |
+          trace.zip
+          screenshot.png
+        retention-days: 7
 
     - name: Commit data changes
       if: success()
