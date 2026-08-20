@@ -71,6 +71,7 @@ async function monitorSolarEdge() {
     const currentUrl = await page.url();
     console.log(`Current URL after login wait: ${currentUrl}`);
 await dismissTermsModal(page);
+    await navigateToSiteDetails(page);
 
     // Extract data from the dashboard
     console.log('Extracting solar data...');
@@ -482,6 +483,71 @@ Please check:
 }
 
 // Run the monitoring function
+async function navigateToSiteDetails(page) {
+  try {
+    console.log('Waiting for site-list page...');
+    // Already waited for site-list URL earlier, but wait a bit more for content
+    await page.waitForTimeout(2000);
+
+    // Look for site links - try multiple selectors
+    const siteLinkSelectors = [
+      'a[href*="/one#/site-details"]',
+      '.site-card a',
+      '.site-row a',
+      '[role="link"]:has-text("Site")',
+      'table tbody tr td a',
+      '.MuiTableRow-root a'
+    ];
+
+    let siteLink = null;
+    for (const selector of siteLinkSelectors) {
+      const locator = page.locator(selector).first();
+      if (await locator.count() > 0) {
+        // Check if it's visible
+        if (await locator.isVisible()) {
+          siteLink = locator;
+          console.log(`Found site link with selector: ${selector}`);
+          break;
+        }
+      }
+    }
+
+    if (!siteLink) {
+      // Fallback: click first visible link that looks like a site name
+      const links = page.locator('a');
+      const count = await links.count();
+      for (let i = 0; i < Math.min(count, 10); i++) {
+        const link = links.nth(i);
+        if (await link.isVisible()) {
+          const text = await link.textContent();
+          if (text && text.trim().length > 0 && !text.includes('http')) {
+            siteLink = link;
+            console.log(`Fallback: using link with text: ${text.trim()}`);
+            break;
+          }
+        }
+      }
+    }
+
+    if (siteLink) {
+      console.log('Clicking site link to navigate to site-details...');
+      await siteLink.click();
+      // Wait for navigation to site-details page
+      await page.waitForURL('**/one#/site-details**', {
+        waitUntil: 'networkidle',
+        timeout: 30000
+      });
+      console.log('Navigated to site-details page');
+      // Wait for data to load
+      await page.waitForTimeout(5000);
+    } else {
+      console.warn('Could not find site link to click; attempting to extract data from site-list page');
+    }
+  } catch (error) {
+    console.warn('Error navigating to site-details:', error.message);
+    // Continue anyway; maybe data is on site-list
+  }
+}
 monitorSolarEdge().catch(console.error);
 
 async function dismissTermsModal(page) {
