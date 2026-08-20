@@ -58,7 +58,7 @@ async function monitorSolarEdge() {
     // Click login button
     await page.click('button:has-text("Log In"), button:has-text("Sign in")');
 
-    // Wait for login to complete and dashboard to load
+    // Wait for login to complete and navigate to site details
     console.log('Waiting for login to complete...');
     try {
       await page.waitForURL('**/one#/site-list**', {
@@ -76,6 +76,31 @@ async function monitorSolarEdge() {
     // Log current URL for debugging
     const currentUrl = await page.url();
     console.log(`Current URL after login wait: ${currentUrl}`);
+
+    // If we are on the site list page, click the first site to view details
+    if (currentUrl.includes('/site-list')) {
+      console.log('Navigating to first site details...');
+      try {
+        // Wait for site rows to appear
+        await page.locator('table tbody tr, .site-list-item, [role=\"row\"]').first().waitFor({ state: 'visible', timeout: 10000 });
+        // Click the first site (assuming first row after header)
+        const firstSiteRow = page.locator('table tbody tr, .site-list-item, [role=\"row\"]').first();
+        await firstSiteRow.click();
+        // Wait for navigation to site details page
+        await page.waitForTimeout(2000); // allow navigation to start
+        await page.waitForURL('**/one#/site-details**', {
+          waitUntil: 'networkidle',
+          timeout: 20000
+        });
+      } catch (navError) {
+        console.warn('Could not navigate to site details, attempting to extract from site list page:', navError.message);
+        // Continue anyway; maybe the list page already shows data
+      }
+    }
+
+    // Log final URL for debugging
+    const finalUrl = await page.url();
+    console.log(`Final URL for data extraction: ${finalUrl}`);
 
     // Extract data from the dashboard
     console.log('Extracting solar data...');
@@ -104,8 +129,32 @@ async function extractSolarData(page) {
   await page.waitForTimeout(5000); // Allow time for charts/widgets to load
 
   // Extract current power data
-  const currentPower = await extractCurrentPower(page);
-  const todayEnergy = await extractTodayEnergy(page);
+  let currentPower = await extractCurrentPower(page);
+  let todayEnergy = await extractTodayEnergy(page);
+
+  // If zero/null, try fallback extraction from page text
+  if ((currentPower === 0 || currentPower === null) && (todayEnergy === 0 || todayEnergy === null)) {
+    console.log('Primary extraction yielded zero/null, trying fallback extraction from page text...');
+    try {
+      const pageText = await page.evaluate(() => document.body.innerText);
+      // Look for patterns like "123.45 kW" or "1,234 kWh"
+      const powerMatch = pageText.match(/([\\d,]+\\.?\\d*)\\s*kW/i);
+      const energyMatch = pageText.match(/([\\d,]+\\.?\\d*)\\s*kWh/i);
+      if (powerMatch) {
+        currentPower = parseFloat(powerMatch[1].replace(/,/g, ''));
+      }
+      if (energyMatch) {
+        todayEnergy = parseFloat(energyMatch[1].replace(/,/g, ''));
+      }
+      if (currentPower !== null || todayEnergy !== null) {
+        console.log(`Fallback extraction successful: power=${currentPower}, energy=${todayEnergy}`);
+      } else {
+        console.log('Fallback extraction did not find power or energy values');
+      }
+    } catch (e) {
+      console.warn('Error in fallback extraction:', e.message);
+    }
+  }
 
   // Try to extract circuit-level data if available
   const circuitData = await extractCircuitData(page);
@@ -114,8 +163,8 @@ async function extractSolarData(page) {
 
   return {
     timestamp,
-    currentPower: currentPower || 0, // kW
-    todayEnergy: todayEnergy || 0,   // kWh
+    currentPower: currentPower !== null ? currentPower : 0, // kW
+    todayEnergy: todayEnergy !== null ? todayEnergy : 0,   // kWh
     circuits: circuitData || [],
     rawData: {
       // Additional raw data points can be added here
