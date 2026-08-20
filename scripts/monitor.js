@@ -583,6 +583,65 @@ async function navigateToSiteDetails(page) {
     // Already waited for site-list URL earlier, but wait a bit more for content
     await page.waitForTimeout(2000);
 
+    // Check if we have a specific site ID or name to navigate to
+    const siteId = process.env.SOLAREDGE_SITE_ID;
+    const siteName = process.env.SOLAREDGE_SITE_NAME;
+
+    // If we have a specific site ID, navigate directly to that site's dashboard
+    if (siteId) {
+      console.log(`Navigating directly to site ID: ${siteId}`);
+      await page.goto(`https://monitoring.solaredge.com/one#/residential/dashboard?siteId=${siteId}`, {
+        waitUntil: 'networkidle',
+        timeout: 30000
+      });
+      console.log('Navigated to specific site dashboard');
+      // Wait for data to load
+      await page.waitForTimeout(5000);
+      return;
+    }
+
+    // If we have a specific site name, look for it in the site list
+    if (siteName) {
+      console.log(`Looking for site with name: ${siteName}`);
+      // Look for site links containing the site name
+      const siteLinkSelectors = [
+        `a:has-text("${siteName}")`,
+        `a[href*="/one#/site-details"]:has-text("${siteName}")`,
+        `.site-card a:has-text("${siteName}")`,
+        `.site-row a:has-text("${siteName}")`
+      ];
+
+      let siteLink = null;
+      for (const selector of siteLinkSelectors) {
+        const locator = page.locator(selector).first();
+        if (await locator.count() > 0) {
+          // Check if it's visible
+          if (await locator.isVisible()) {
+            siteLink = locator;
+            console.log(`Found site link with selector: ${selector}`);
+            break;
+          }
+        }
+      }
+
+      if (siteLink) {
+        console.log('Clicking site link to navigate to site-details...');
+        await siteLink.click();
+        // Wait for navigation to site-details page
+        await page.waitForURL('**/one#/site-details**', {
+          waitUntil: 'networkidle',
+          timeout: 30000
+        });
+        console.log('Navigated to site-details page');
+        // Wait for data to load
+        await page.waitForTimeout(5000);
+        return;
+      } else {
+        console.warn(`Could not find site link with name: ${siteName}; falling back to generic site selection`);
+      }
+    }
+
+    // Original fallback behavior: look for any site link
     // Look for site links - try multiple selectors
     const siteLinkSelectors = [
       'a[href*="/one#/site-details"]',
