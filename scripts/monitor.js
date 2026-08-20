@@ -15,23 +15,18 @@ async function monitorSolarEdge() {
     process.exit(1);
   }
 
-  const browser = await chromium.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu'
-    ]
-  });
-
+  let browser;
   try {
-    const page = await browser.newPage();
+    browser = await chromium.launch();
+    const context = await browser.newContext();
+    // Start tracing
+    await context.tracing.start({
+      screenshots: true,
+      snapshots: true,
+      sources: true,
+    });
 
-    // Set viewport for consistent rendering
+    const page = await context.newPage();
     await page.setViewportSize({ width: 1280, height: 720 });
 
     // Navigate to SolarEdge login page
@@ -45,10 +40,9 @@ async function monitorSolarEdge() {
     const signInButton = page.locator('text=/Sign in|Log in/i').first();
     await signInButton.waitFor({ state: 'visible', timeout: 20000 });
     await signInButton.click();
-    // Wait for login form and fill credentials
+
     // Wait for login form and fill credentials
     console.log('Filling login credentials...');
-    // Wait for password field to appear
     const inputs = page.locator('input:visible');
     await inputs.first().waitFor({ state: 'visible', timeout: 20000 });
     await inputs.first().fill(username);
@@ -76,6 +70,8 @@ async function monitorSolarEdge() {
     // Log current URL for debugging
     const currentUrl = await page.url();
     console.log(`Current URL after login wait: ${currentUrl}`);
+await dismissTermsModal(page);
+    await navigateToSiteDetails(page);
 
     // Extract data from the dashboard
     console.log('Extracting solar data...');
@@ -87,15 +83,32 @@ async function monitorSolarEdge() {
     // Check for anomalies and create alerts if needed
     await checkForAnomalies(data);
 
-    console.log('Monitoring completed successfully');
+    // Stop tracing and save trace
+    try {
+      await context.tracing.stop({ path: 'trace.zip' });
+      console.log('Trace saved to trace.zip');
+    } catch (traceError) {
+      console.warn('Failed to stop tracing:', traceError.message);
+    }
 
+    // Optional: take a screenshot for debugging
+    try {
+      await page.screenshot({ path: 'screenshot.png', fullPage: true });
+      console.log('Screenshot saved to screenshot.png');
+    } catch (ssError) {
+      console.warn('Failed to take screenshot:', ssError.message);
+    }
+
+    console.log('Monitoring completed successfully');
   } catch (error) {
     console.error('Error during monitoring:', error);
     // Create a GitHub issue for monitoring failures
     await createMonitoringIssue(error);
     process.exit(1);
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
@@ -103,9 +116,79 @@ async function extractSolarData(page) {
   // Wait for data to load on dashboard
   await page.waitForTimeout(5000); // Allow time for charts/widgets to load
 
-  // Extract current power data
-  const currentPower = await extractCurrentPower(page);
-  const todayEnergy = await extractTodayEnergy(page);
+  // Try to extract from page text content
+  const textData = await page.evaluate(() => {
+    const bodyText = document.body.innerText;
+    const powerMatch = bodyText.match(/([\d,]+\.?\d*)\s*kW/i);
+    const energyMatch = bodyText.match(/([\d,]+\.?\d*)\s*kWh/i);
+    const power = powerMatch ? parseFloat(powerMatch[1].replace(/,/g, '')) : null;
+    const energy = energyMatch ? parseFloat(energyMatch[1].replace(/,/g, '')) : null;
+    return { power, energy };
+  });
+
+  let currentPower = textData.power;
+  let todayEnergy = textData.energy;
+
+  // Fallback to selector-based extraction if text extraction failed
+  if (currentPower === null) {
+    // Try to find current power display - this will vary based on SolarEdge UI
+    // Common selectors for power displays
+    const selectors = [
+      '.power-value',
+      '[data-testid="current-power"]',
+      '.current-power',
+      '.site-power-value',
+      'text=/[\d,]+\.?\d*\s*kW/i'
+    ];
+
+    for (const selector of selectors) {
+      try {
+        const element = await page.locator(selector).first();
+        if (await element.count() > 0) {
+          const text = await element.textContent();
+          // Extract numeric value from text
+          const match = text.match(/([\d,]+\.?\d*)/);
+          if (match) {
+            currentPower = parseFloat(match[1].replace(/,/g, ''));
+            break;
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+
+    // If we can't find it via selectors, try to extract from charts
+    if (currentPower === null) {
+      currentPower = await extractPowerFromChart(page);
+    }
+  }
+
+  if (todayEnergy === null) {
+    const energySelectors = [
+      '.energy-value',
+      '[data-testid="today-energy"]',
+      '.today-energy',
+      '.daily-energy-value',
+      'text=/[\d,]+\.?\d*\s*kWh/i'
+    ];
+
+    for (const selector of energySelectors) {
+      try {
+        const element = await page.locator(selector).first();
+        if (await element.count() > 0) {
+          const text = await element.textContent();
+          const match = text.match(/([\d,]+\.?\d*)/);
+          if (match) {
+            todayEnergy = parseFloat(match[1].replace(/,/g, ''));
+            break;
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+  }
 
   // Try to extract circuit-level data if available
   const circuitData = await extractCircuitData(page);
@@ -122,7 +205,6 @@ async function extractSolarData(page) {
     }
   };
 }
-
 async function extractCurrentPower(page) {
   try {
     // Try to find current power display - this will vary based on SolarEdge UI
@@ -470,4 +552,145 @@ Please check:
 }
 
 // Run the monitoring function
+async function navigateToSiteDetails(page) {
+  try {
+    console.log('Waiting for site-list page...');
+    // Already waited for site-list URL earlier, but wait a bit more for content
+    await page.waitForTimeout(2000);
+
+    // Check if we have a specific site ID or name to navigate to
+    const siteId = process.env.SOLAREDGE_SITE_ID;
+    const siteName = process.env.SOLAREDGE_SITE_NAME;
+
+    // If we have a specific site ID, navigate directly to that site's dashboard
+    if (siteId) {
+      console.log(`Navigating directly to site ID: ${siteId}`);
+      await page.goto(`https://monitoring.solaredge.com/one#/residential/dashboard?siteId=${siteId}`, {
+        waitUntil: 'networkidle',
+        timeout: 30000
+      });
+      console.log('Navigated to specific site dashboard');
+      // Wait for data to load
+      await page.waitForTimeout(5000);
+      return;
+    }
+
+    // If we have a specific site name, look for it in the site list
+    if (siteName) {
+      console.log(`Looking for site with name: ${siteName}`);
+      // Look for site links containing the site name
+      const siteLinkSelectors = [
+        `a:has-text("${siteName}")`,
+        `a[href*="/one#/site-details"]:has-text("${siteName}")`,
+        `.site-card a:has-text("${siteName}")`,
+        `.site-row a:has-text("${siteName}")`
+      ];
+
+      let siteLink = null;
+      for (const selector of siteLinkSelectors) {
+        const locator = page.locator(selector).first();
+        if (await locator.count() > 0) {
+          // Check if it's visible
+          if (await locator.isVisible()) {
+            siteLink = locator;
+            console.log(`Found site link with selector: ${selector}`);
+            break;
+          }
+        }
+      }
+
+      if (siteLink) {
+        console.log('Clicking site link to navigate to site-details...');
+        await siteLink.click();
+        // Wait for navigation to site-details page
+        await page.waitForURL('**/one#/site-details**', {
+          waitUntil: 'networkidle',
+          timeout: 30000
+        });
+        console.log('Navigated to site-details page');
+        // Wait for data to load
+        await page.waitForTimeout(5000);
+        return;
+      } else {
+        console.warn(`Could not find site link with name: ${siteName}; falling back to generic site selection`);
+      }
+    }
+
+    // Original fallback behavior: look for any site link
+    // Look for site links - try multiple selectors
+    const siteLinkSelectors = [
+      'a[href*="/one#/site-details"]',
+      '.site-card a',
+      '.site-row a',
+      '[role="link"]:has-text("Site")',
+      'table tbody tr td a',
+      '.MuiTableRow-root a'
+    ];
+
+    let siteLink = null;
+    for (const selector of siteLinkSelectors) {
+      const locator = page.locator(selector).first();
+      if (await locator.count() > 0) {
+        // Check if it's visible
+        if (await locator.isVisible()) {
+          siteLink = locator;
+          console.log(`Found site link with selector: ${selector}`);
+          break;
+        }
+      }
+    }
+
+    if (!siteLink) {
+      // Fallback: click first visible link that looks like a site name
+      const links = page.locator('a');
+      const count = await links.count();
+      for (let i = 0; i < Math.min(count, 10); i++) {
+        const link = links.nth(i);
+        if (await link.isVisible()) {
+          const text = await link.textContent();
+          if (text && text.trim().length > 0 && !text.includes('http')) {
+            siteLink = link;
+            console.log(`Fallback: using link with text: ${text.trim()}`);
+            break;
+          }
+        }
+      }
+    }
+
+    if (siteLink) {
+      console.log('Clicking site link to navigate to site-details...');
+      await siteLink.click();
+      // Wait for navigation to site-details page
+      await page.waitForURL('**/one#/site-details**', {
+        waitUntil: 'networkidle',
+        timeout: 30000
+      });
+      console.log('Navigated to site-details page');
+      // Wait for data to load
+      await page.waitForTimeout(5000);
+    } else {
+      console.warn('Could not find site link to click; attempting to extract data from site-list page');
+    }
+  } catch (error) {
+    console.warn('Error navigating to site-details:', error.message);
+    // Continue anyway; maybe data is on site-list
+  }
+}
 monitorSolarEdge().catch(console.error);
+
+async function dismissTermsModal(page) {
+  try {
+    // Wait for either button to be visible (within a modal) for up to 5 seconds
+    const buttons = page.locator('button:has-text("Submit"), button:has-text("Remind Me Later")');
+    // Wait for first button to be visible
+    await buttons.first().waitFor({ state: 'visible', timeout: 5000 });
+    // Click the first visible button with force and timeout
+    await buttons.first().click({ timeout: 5000, force: true });
+    console.log('Dismissed Terms and Conditions modal via button click');
+    // Wait for the button to be detached or not visible (optional)
+    await buttons.first().waitFor({ state: 'detached', timeout: 5000 });
+  } catch (err) {
+    // Not found or timeout, continue
+    console.debug('No Terms and Conditions modal buttons found or timeout:', err.message);
+  }
+}
