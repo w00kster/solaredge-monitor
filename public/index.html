@@ -204,7 +204,7 @@
     <div class="container">
         <header>
             <h1>⚡ SolarEdge Monitoring Dashboard</h1>
-            <p class="last-updated">Last updated: 2026-08-20 07:13:49 UTC</p>
+            <p class="last-updated">Last updated: 2026-08-20 08:02:52 UTC</p>
         </div>
 
         <!-- Alerts Section -->
@@ -260,7 +260,7 @@
                     <div class="metric">
                         <span class="metric-label">Historical Records</span>
                         <span class="metric-value">
-                            8
+                            9
                         </span>
                     </div>
                     <div class="metric">
@@ -305,11 +305,11 @@
         const powerChart = new Chart(powerCtx, {
             type: 'line',
             data: {
-                labels: ["11:11 PM","11:32 PM","12:55 AM","04:58 AM","05:42 AM","06:28 AM","06:42 AM","07:13 AM"],
+                labels: ["11:11 PM","11:32 PM","12:55 AM","04:58 AM","05:42 AM","06:28 AM","06:42 AM","07:13 AM","08:02 AM"],
                 datasets: [
                     {
                         label: 'Power (kW)',
-                        data: [0,0,0,0,0,0,6.38,6.38],
+                        data: [0,0,0,0,0,0,6.38,6.38,6.38],
                         borderColor: 'rgb(59, 130, 246)',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         tension: 0.3,
@@ -317,7 +317,7 @@
                     },
                     {
                         label: 'Energy (kWh)',
-                        data: [0,0,0,0,0,0,23.54,23.54],
+                        data: [0,0,0,0,0,0,23.54,23.54,23.54],
                         borderColor: 'rgb(16, 185, 129)',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         tension: 0.3,
