@@ -15,19 +15,19 @@ async function monitorSolarEdge() {
     process.exit(1);
   }
 
-  // Create a new context with tracing enabled
-  const context = await browser.newContext();
-  // Start tracing
-  await context.tracing.start({
-    screenshots: true,
-    snapshots: true,
-    sources: true,
-  });
+  let browser;
+  try {
+    browser = await chromium.launch();
+    const context = await browser.newContext();
+    // Start tracing
+    await context.tracing.start({
+      screenshots: true,
+      snapshots: true,
+      sources: true,
+    });
 
-  const page = await context.newPage();
-
-  // Set viewport for consistent rendering
-  await page.setViewportSize({ width: 1280, height: 720 });
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 1280, height: 720 });
 
     // Navigate to SolarEdge login page
     console.log('Navigating to SolarEdge monitoring portal...');
@@ -40,10 +40,9 @@ async function monitorSolarEdge() {
     const signInButton = page.locator('text=/Sign in|Log in/i').first();
     await signInButton.waitFor({ state: 'visible', timeout: 20000 });
     await signInButton.click();
-    // Wait for login form and fill credentials
+
     // Wait for login form and fill credentials
     console.log('Filling login credentials...');
-    // Wait for password field to appear
     const inputs = page.locator('input:visible');
     await inputs.first().waitFor({ state: 'visible', timeout: 20000 });
     await inputs.first().fill(username);
@@ -81,6 +80,7 @@ async function monitorSolarEdge() {
 
     // Check for anomalies and create alerts if needed
     await checkForAnomalies(data);
+
     // Stop tracing and save trace
     try {
       await context.tracing.stop({ path: 'trace.zip' });
@@ -88,6 +88,7 @@ async function monitorSolarEdge() {
     } catch (traceError) {
       console.warn('Failed to stop tracing:', traceError.message);
     }
+
     // Optional: take a screenshot for debugging
     try {
       await page.screenshot({ path: 'screenshot.png', fullPage: true });
@@ -95,15 +96,17 @@ async function monitorSolarEdge() {
     } catch (ssError) {
       console.warn('Failed to take screenshot:', ssError.message);
     }
-    console.log('Monitoring completed successfully');
 
+    console.log('Monitoring completed successfully');
   } catch (error) {
     console.error('Error during monitoring:', error);
     // Create a GitHub issue for monitoring failures
     await createMonitoringIssue(error);
     process.exit(1);
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
