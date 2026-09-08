@@ -1811,5 +1811,12 @@
     "todayEnergy": 26.54,
     "circuits": [],
     "rawData": {}
+  },
+  {
+    "timestamp": "2026-09-08T11:30:21.505Z",
+    "currentPower": 6.38,
+    "todayEnergy": 26.54,
+    "circuits": [],
+    "rawData": {}
   }
 ]
