@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-27T21:45:41.885Z",
-  "currentPower": 6.38,
-  "todayEnergy": 33.56,
+  "timestamp": "2026-09-27T22:56:52.283Z",
+  "currentPower": 0,
+  "todayEnergy": 0,
   "circuits": [],
   "rawData": {}
 }
