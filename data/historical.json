@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-09-05T00:14:01.772Z",
-    "currentPower": 6.38,
-    "todayEnergy": 29.09,
-    "circuits": [],
-    "rawData": {}
-  },
-  {
     "timestamp": "2026-09-05T04:41:46.097Z",
     "currentPower": 6.38,
     "todayEnergy": 29.09,
@@ -1373,6 +1366,13 @@
   },
   {
     "timestamp": "2026-10-04T22:57:41.055Z",
+    "currentPower": 6.38,
+    "todayEnergy": 33.69,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-10-05T01:48:35.686Z",
     "currentPower": 6.38,
     "todayEnergy": 33.69,
     "circuits": [],
