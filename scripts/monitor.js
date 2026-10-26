@@ -32,7 +32,7 @@ async function monitorSolarEdge() {
     // Navigate to SolarEdge login page
     console.log('Navigating to SolarEdge monitoring portal...');
     await page.goto('https://monitoring.solaredge.com/mfe/auth/', {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: 60000
     });
 
