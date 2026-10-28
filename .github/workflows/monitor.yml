@@ -60,6 +60,7 @@ jobs:
       env:
         SOLAREDGE_USERNAME: ${{ secrets.SOLAREDGE_USERNAME }}
         SOLAREDGE_PASSWORD: ${{ secrets.SOLAREDGE_PASSWORD }}
+        GH_TOKEN: ${{ github.token }}
       run: npm run monitor
 
     - name: Upload trace and screenshot
