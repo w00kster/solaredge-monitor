@@ -1,26 +1,5 @@
 [
   {
-    "timestamp": "2026-10-15T21:54:03.320Z",
-    "currentPower": 6.38,
-    "todayEnergy": 11.47,
-    "circuits": [],
-    "rawData": {}
-  },
-  {
-    "timestamp": "2026-10-15T23:00:38.857Z",
-    "currentPower": 6.38,
-    "todayEnergy": 11.47,
-    "circuits": [],
-    "rawData": {}
-  },
-  {
-    "timestamp": "2026-10-16T01:13:32.143Z",
-    "currentPower": 6.38,
-    "todayEnergy": 11.47,
-    "circuits": [],
-    "rawData": {}
-  },
-  {
     "timestamp": "2026-10-16T05:58:03.883Z",
     "currentPower": 6.38,
     "todayEnergy": 11.47,
@@ -827,6 +806,13 @@
   },
   {
     "timestamp": "2026-11-14T21:02:23.726Z",
+    "currentPower": 6.38,
+    "todayEnergy": 16.76,
+    "circuits": [],
+    "rawData": {}
+  },
+  {
+    "timestamp": "2026-11-15T05:50:47.624Z",
     "currentPower": 6.38,
     "todayEnergy": 16.76,
     "circuits": [],
